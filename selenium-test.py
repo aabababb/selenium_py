@@ -5,7 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
-import unittest, time, re,datetime
+import unittest, time, re,datetime,os,sys
 
 class AppDynamicsJob(unittest.TestCase):
     def setUp(self):
@@ -13,7 +13,7 @@ class AppDynamicsJob(unittest.TestCase):
         # as documented in https://docs.appdynamics.com/display/PRO44/Write+Your+First+Script
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(30)
-        self.base_url = "http://www.baidu.com/home.html"
+        self.base_url = "http://baidu.com/home.html"
         self.verificationErrors = []
         self.accept_next_alert = True
     
@@ -46,56 +46,53 @@ class AppDynamicsJob(unittest.TestCase):
                 print("except1")
                 time.sleep(1)
                 #driver.refresh()
+                driver.find_element_by_xpath("//html").send_keys(Keys.F5)
+                print("f51")
                 pass
         else: self.fail("time out")
         driver.find_element_by_id("footer-logo2").click()
         while 1:
+            
             # ERROR: Caught exception [ERROR: Unsupported command [selectWindow | tab=0 | ]]
             for i in range(60):
                 try:
                     if self.is_element_present(By.ID, "btn1"):
                         print("btn1-present")
-                        click1=driver.find_element_by_id("btn1").click()
-                        if click1 != None:
-                            print("click1=%s" % click1)
-                            return
-                        else:
-                            print("b-click1=%s" % click1)
-                            print("b-click1 time=%s" % datetime.datetime.now())
-                            break
+                        try:
+                            a = driver.find_element_by_xpath("/html/body/div/div[3]/ul/li/a/h3").text
+                            print("a4=%s" % a)
+                            if a=='60':
+                                print("a60=%s" % a)
+                                print("a60-time=%s" % datetime.datetime.now())
+                                os.system('TASKKILL /F /IM geckodriver.exe')
+                                exit(0)
+                            else:
+                                print("a1=%s" % a)
+                                click1=driver.find_element_by_id("btn1").click()
+                                if self.is_element_present(By.XPATH, "/html/body/div/div[4]"):
+                                    print("div[4]_element_present")
+                                    click2=driver.find_element_by_xpath("/html/body/div/div[4]").click()
+                                    print("b-click2 time=%s" % datetime.datetime.now())                           
+                                    continue
+                                else:
+                                    print("div[4] no time=%s" % datetime.datetime.now())
+                                    pass
+                            
+                        except BaseException as e:
+                            print(e)
                     else:
                         print("btn1-not_element_present")
                         driver.find_element_by_xpath("//html").send_keys(Keys.F5)
-                        print("btn1f5")
+                        print("btn1f5 %s" % datetime.datetime.now())
                         time.sleep(1)
+                        pass
                 except:
-                    print("not_btn1 time=%s" % datetime.datetime.now())
+                    print("except time=%s" % datetime.datetime.now())
                     pass
                 time.sleep(1)
             else: self.fail("time out")
             
-            for i in range(60):
-                try:
-                    if self.is_element_present(By.XPATH, "/html/body/div/div[4]"):
-                        print("div[4]_element_present")
-                        click2=driver.find_element_by_xpath("/html/body/div/div[4]").click()
-                        if click2 != None:
-                            print("click2=%s" % click2)
-                            return
-                        else:
-                            print("b-click2=%s" % click2)
-                            print("b-click2 time=%s" % datetime.datetime.now())
-                            break          
-                except:
-                    print("not_div[4] time=%s" % datetime.datetime.now())
-                    pass
-                time.sleep(1)
-         
-            else: self.fail("time out")
-        return
-        #driver.find_element_by_id("btn1").click()
-        #driver.find_element_by_xpath("/html/body/div/div[4]").click()
-    
+
     def is_element_present(self, how, what):
         try: self.driver.find_element(by=how, value=what)
         except NoSuchElementException as e: return False
