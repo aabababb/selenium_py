@@ -9,8 +9,6 @@ import unittest, time, re,datetime,os,sys
 
 class AppDynamicsJob(unittest.TestCase):
     def setUp(self):
-        # AppDynamics will automatically override this web driver
-        # as documented in https://docs.appdynamics.com/display/PRO44/Write+Your+First+Script
         self.driver = webdriver.Firefox()
         self.driver.implicitly_wait(30)
         self.base_url = "http://baidu.com/home.html"
@@ -48,51 +46,50 @@ class AppDynamicsJob(unittest.TestCase):
                 #driver.refresh()
                 driver.find_element_by_xpath("//html").send_keys(Keys.F5)
                 print("f51")
-                pass
+                continue
         else: self.fail("time out")
         driver.find_element_by_id("footer-logo2").click()
-        while 1:
-            
-            # ERROR: Caught exception [ERROR: Unsupported command [selectWindow | tab=0 | ]]
-            for i in range(60):
-                try:
-                    if self.is_element_present(By.ID, "btn1"):
-                        print("btn1-present")
-                        try:
-                            a = driver.find_element_by_xpath("/html/body/div/div[3]/ul/li/a/h3").text
-                            print("a4=%s" % a)
-                            if a=='60':
-                                print("a60=%s" % a)
-                                print("a60-time=%s" % datetime.datetime.now())
-                                os.system('TASKKILL /F /IM geckodriver.exe')
-                                exit(0)
+        tag=True
+        while True:
+            try:
+                if self.is_element_present(By.ID, "btn1"):
+                    print("btn1-present")
+                    try:
+                        a = driver.find_element_by_xpath("/html/body/div/div[3]/ul/li/a/h3").text
+                        print("a4=%s" % a)
+                        if a=='60':
+                            print("a60=%s" % a)
+                            print("a60-time=%s" % datetime.datetime.now())
+                            os.system('TASKKILL /F /IM geckodriver.exe')
+                            #exit(1)
+                            tag=False
+                            return
+                        else:
+                            print("a1=%s" % a)
+                            click1=driver.find_element_by_id("btn1").click()
+                            if self.is_element_present(By.XPATH, "/html/body/div/div[4]"):
+                                print("div[4]_element_present")
+                                click2=driver.find_element_by_xpath("/html/body/div/div[4]").click()
+                                print("b-click2 time=%s" % datetime.datetime.now())                           
+                                continue
                             else:
-                                print("a1=%s" % a)
-                                click1=driver.find_element_by_id("btn1").click()
-                                if self.is_element_present(By.XPATH, "/html/body/div/div[4]"):
-                                    print("div[4]_element_present")
-                                    click2=driver.find_element_by_xpath("/html/body/div/div[4]").click()
-                                    print("b-click2 time=%s" % datetime.datetime.now())                           
-                                    continue
-                                else:
-                                    print("div[4] no time=%s" % datetime.datetime.now())
-                                    pass
-                            
-                        except BaseException as e:
-                            print(e)
-                    else:
-                        print("btn1-not_element_present")
-                        driver.find_element_by_xpath("//html").send_keys(Keys.F5)
-                        print("btn1f5 %s" % datetime.datetime.now())
-                        time.sleep(1)
-                        pass
-                except:
-                    print("except time=%s" % datetime.datetime.now())
-                    pass
+                                print("div[4] no time=%s" % datetime.datetime.now())
+                                continue
+                        
+                    except BaseException as e:
+                        print("h3 except time=%s" % datetime.datetime.now())
+                        print(e)
+                else:
+                    print("btn1-not_element_present")
+                    driver.find_element_by_xpath("//html").send_keys(Keys.F5)
+                    print("btn1f5 %s" % datetime.datetime.now())
+                    time.sleep(1)
+                    continue
+            except:
+                print("except time=%s" % datetime.datetime.now())
                 time.sleep(1)
-            else: self.fail("time out")
+                continue
             
-
     def is_element_present(self, how, what):
         try: self.driver.find_element(by=how, value=what)
         except NoSuchElementException as e: return False
@@ -115,8 +112,6 @@ class AppDynamicsJob(unittest.TestCase):
         finally: self.accept_next_alert = True
     
     def tearDown(self):
-        # To know more about the difference between verify and assert,
-        # visit https://www.seleniumhq.org/docs/06_test_design_considerations.jsp#validating-results
         self.assertEqual([], self.verificationErrors)
 
 if __name__ == "__main__":
